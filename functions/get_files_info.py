@@ -3,7 +3,7 @@ import os
 def get_files_info(working_directory, directory="."):
     try:
         working_dir_abs = os.path.abspath(working_directory)
-        target_dir = os.normpath(os.path.join(working_dir_abs, directory))
+        target_dir = os.path.normpath(os.path.join(working_dir_abs, directory))
         
         # Check if target_dir falls within working_directory path
         valid_target_dir = os.path.commonpath([working_dir_abs, target_dir]) == working_dir_abs
