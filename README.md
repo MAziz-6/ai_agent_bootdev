@@ -59,7 +59,6 @@ The project is organized into modular components to separate the agent's logic, 
 
 ### Directory Layout
 ```text
-.
 ├── main.py          # The core agentic loop and API orchestration
 ├── tools.py         # Definitions for file I/O and code execution
 ├── prompts.py       # System instructions and persona definitions
