@@ -5,7 +5,7 @@ from dotenv import load_dotenv
 from google import genai
 from google.genai import types
 from prompts import system_prompt
-from call_function import available_functions
+from call_function import available_functions, call_function
 
 
 
@@ -40,18 +40,33 @@ def generate_content(client, messages, verbose):
             tools=[available_functions]
         )
     )
+    function_results = []
+
     if not response.usage_metadata:
         raise RuntimeError("Gemini API response appears to be malformed")
 
     if verbose:
         print("Prompt tokens:", response.usage_metadata.prompt_token_count)
         print("Response tokens:", response.usage_metadata.candidates_token_count)
-    print("Response:")
-    print(response.text)
-    if len(response.function_calls) > 0:
-        print("\nFunction Calls:")
-        for fc in response.function_calls:
-            print(f"Calling function: {fc.name}({fc.args})")
+    
+    if not response.function_calls:
+        print("Response:")
+        print(response.text)
+        return
 
+    print("\nFunction Calls:")
+    for fc in response.function_calls:
+        print(f"Calling function: {fc.name}({fc.args})")
+        function_call_result = call_function(fc, verbose=True)
+        if not function_call_result.parts:
+            raise Exception("Function call response appears to be malformed - No Parts")
+        if function_call_result.parts[0].function_response is None:
+            raise Exception("Function call response appears to be malformed - No Function Response")
+        if function_call_result.parts[0].function_response.response is None:
+            raise Exception("Function call response appears to be malformed - No Actual Result from running function")
+        function_results.append(function_call_result.parts[0])
+        if verbose:
+            print(f'-> {function_call_result.parts[0].function_response.response}')
+            
 if __name__ == "__main__":
     main()
